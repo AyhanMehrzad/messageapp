@@ -23,9 +23,9 @@ apt-get install -y python3-pip python3-venv nginx
 
 # 2. Set up Python Environment
 echo "Setting up Python virtual environment..."
-if [ ! -d "$PROJECT_DIR/venv" ]; then
-    python3 -m venv "$PROJECT_DIR/venv"
-fi
+# Remove existing venv to ensure a clean slate (fixes "pip not found" issues)
+rm -rf "$PROJECT_DIR/venv"
+python3 -m venv "$PROJECT_DIR/venv"
 
 # Activate venv and install requirements
 "$PROJECT_DIR/venv/bin/pip" install --upgrade pip
@@ -47,6 +47,14 @@ systemctl restart messageapp
 
 # 4. Configure Nginx
 echo "Configuring Nginx..."
+
+# Stop Apache if it's running (it conflicts on port 80)
+if systemctl is-active --quiet apache2; then
+    echo "Stopping Apache2 to free up port 80..."
+    systemctl stop apache2
+    systemctl disable apache2
+fi
+
 NGINX_TEMPLATE="$SCRIPT_DIR/messageapp.nginx.template"
 NGINX_FILE="$SCRIPT_DIR/messageapp.nginx"
 TARGET_NGINX_FILE="/etc/nginx/sites-available/messageapp"
