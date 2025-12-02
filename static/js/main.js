@@ -790,32 +790,49 @@ async function startAudioRecording(e) {
             }
         };
 
-        mediaRecorder.onstop = () => {
+        mediaRecorder.onstop = async () => {
             if (audioChunks.length > 0) {
                 const audioBlob = new Blob(audioChunks, {
                     type: mediaRecorder.mimeType || 'audio/webm'
                 });
-                const reader = new FileReader();
-                reader.readAsDataURL(audioBlob);
-                reader.onloadend = () => {
-                    const base64data = reader.result;
 
-                    // Store in browser cache
-                    storeMediaInCache('audio', base64data, mediaRecorder.mimeType || 'audio/webm');
+                // Create blob URL for local preview
+                const blobUrl = URL.createObjectURL(audioBlob);
 
-                    // Send message
-                    socket.emit('chat_message', { msg: base64data, type: 'audio' });
+                // Show locally immediately with blob URL
+                addMessage({
+                    user: myUsername,
+                    msg: blobUrl,
+                    type: 'audio',
+                    timestamp: Date.now() / 1000
+                }, false);
 
-                    // Show locally immediately
-                    addMessage({
-                        user: myUsername,
-                        msg: base64data, // Or use a blob URL if preferred for performance
-                        type: 'audio',
-                        timestamp: Date.now() / 1000
-                    }, false);
+                // Upload to server
+                try {
+                    const formData = new FormData();
+                    formData.append('file', audioBlob, `audio_${Date.now()}.webm`);
 
-                    console.log('🎙️ Audio message sent and cached');
-                };
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        const audioUrl = result.url;
+
+                        // Send message with server URL
+                        socket.emit('chat_message', { msg: audioUrl, type: 'audio' });
+
+                        console.log('🎙️ Audio message uploaded and sent:', audioUrl);
+                    } else {
+                        console.error('Audio upload failed');
+                        alert('Failed to send audio message');
+                    }
+                } catch (err) {
+                    console.error('Error uploading audio:', err);
+                    alert('Failed to send audio message');
+                }
             }
             stream.getTracks().forEach(track => track.stop());
         };
