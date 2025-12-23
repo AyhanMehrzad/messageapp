@@ -57,9 +57,11 @@ echo "Configuring Nginx..."
 echo "Configuring Apache2..."
 apt-get install -y apache2
 
-# Change Apache port to 8080
-sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf
-sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/' /etc/apache2/sites-available/000-default.conf
+# Change Apache port to 8080 (Handle idempotency to prevent 808080)
+# This regex searches for Listen followed by 80 and optional extra digits, replacing with fixed 8080
+sed -i 's/Listen 80[0-9]*/Listen 8080/' /etc/apache2/ports.conf
+# Same for VirtualHost
+sed -i 's/<VirtualHost \*:80[0-9]*>/<VirtualHost *:8080>/' /etc/apache2/sites-available/000-default.conf
 
 # Restart Apache to apply changes
 echo "Checking Apache configuration..."

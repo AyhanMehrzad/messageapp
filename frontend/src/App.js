@@ -9,8 +9,7 @@ const ReplyPreview = lazy(() => import('./components/ReplyPreview'));
 const Login = lazy(() => import('./components/Login'));
 
 // Initialize socket connection
-// Initialize socket connection
-const BACKEND_URL = 'http://localhost:5000'; // Direct backend URL
+const BACKEND_URL = window.location.origin; // Use current origin (works for both dev and prod)
 const socket = io(BACKEND_URL, {
   transports: ['websocket'], // Force websocket only for better performance
   reconnection: true,
