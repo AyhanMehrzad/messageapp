@@ -48,12 +48,17 @@ systemctl restart messageapp
 # 4. Configure Nginx
 echo "Configuring Nginx..."
 
-# Stop Apache if it's running (it conflicts on port 80)
-if systemctl is-active --quiet apache2; then
-    echo "Stopping Apache2 to free up port 80..."
-    systemctl stop apache2
-    systemctl disable apache2
-fi
+# Configure Apache to listen on port 8080 to avoid conflict with Nginx
+echo "Configuring Apache2..."
+apt-get install -y apache2
+
+# Change Apache port to 8080
+sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf
+sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/' /etc/apache2/sites-available/000-default.conf
+
+# Restart Apache to apply changes
+systemctl enable apache2
+systemctl restart apache2
 
 NGINX_TEMPLATE="$SCRIPT_DIR/messageapp.nginx.template"
 NGINX_FILE="$SCRIPT_DIR/messageapp.nginx"
@@ -70,12 +75,12 @@ rm -f /etc/nginx/sites-enabled/default
 
 nginx -t
 systemctl restart nginx
-73: 
-74: # 5. SSL Configuration (Certbot)
-75: echo "Configuring SSL with Certbot..."
-76: # Only run if domain is reachable (basic check) or force it
-77: certbot --nginx -d securechanel.xyz -d www.securechanel.xyz --non-interactive --agree-tos -m admin@securechanel.xyz --redirect
-78: 
-79: echo "Deployment complete! Your app should be live at https://securechanel.xyz"
+
+# 5. SSL Configuration (Certbot)
+echo "Configuring SSL with Certbot..."
+# Only run if domain is reachable (basic check) or force it
+certbot --nginx -d securechanel.xyz -d www.securechanel.xyz --non-interactive --agree-tos -m admin@securechanel.xyz --redirect
+
+echo "Deployment complete! Your app should be live at https://securechanel.xyz"
 
 echo "Deployment complete! Your app should be live at http://$(curl -s ifconfig.me) or your server IP."
