@@ -21,6 +21,11 @@ echo "Installing system dependencies..."
 apt-get update
 apt-get install -y python3-pip python3-venv nginx certbot python3-certbot-nginx
 
+# 1.5 Update Frontend (Build React App)
+echo "Building and deploying Frontend..."
+chmod +x "$SCRIPT_DIR/update_frontend.sh"
+"$SCRIPT_DIR/update_frontend.sh"
+
 # 2. Set up Python Environment
 echo "Setting up Python virtual environment..."
 # Remove existing venv to ensure a clean slate (fixes "pip not found" issues)

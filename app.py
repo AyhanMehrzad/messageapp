@@ -64,13 +64,17 @@ def check_block():
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
-    if 'user' in session:
-        # If user is logged in, redirect to dashboard or just return success if it's an API call?
-        # For React app integration, if this is hit by fetch, we want to know it's a success.
-        if request.headers.get('Accept') == 'application/json':
-            return jsonify({'status': 'logged_in', 'user': session['user']})
-        return redirect(url_for('dashboard'))
+    # Helper to check if it's an API call/JSON request
+    if request.headers.get('Accept') == 'application/json':
+         if 'user' in session:
+             return jsonify({'status': 'logged_in', 'user': session['user']})
+         return jsonify({'error': 'Unauthorized'}), 401
 
+    # For normal browser access, always serve the React App on GET
+    if request.method == 'GET':
+        return render_template('index.html')
+
+    # Handle Login POST (used by React App)
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -83,9 +87,10 @@ def login():
         else:
             if request.headers.get('Accept') == 'application/json':
                 return jsonify({'error': 'Invalid Credentials'}), 401
-            return render_template('login.html', error="Invalid Credentials")
-            
-    return render_template('login.html')
+            # If not JSON, we can't render login.html anymore as it's legacy. 
+            # But the React app handles the response. 
+            return jsonify({'error': 'Invalid Credentials'}), 401
+
 
 @app.route('/dashboard')
 def dashboard():
