@@ -57,6 +57,14 @@ WantedBy=multi-user.target"
 echo "Installing service to $SYSTEMD_DIR/$SERVICE_NAME..."
 echo "$SERVICE_CONTENT" | sudo tee "$SYSTEMD_DIR/$SERVICE_NAME" > /dev/null
 
+# Clean up any existing process on port 5000 (e.g., manual runs)
+echo "Checking for conflicting processes on port 5000..."
+if sudo lsof -i :5000 > /dev/null 2>&1; then
+    echo "Killing existing process on port 5000..."
+    sudo fuser -k 5000/tcp > /dev/null 2>&1
+    sleep 2
+fi
+
 # Reload systemd daemon
 echo "Reloading systemd daemon..."
 sudo systemctl daemon-reload
