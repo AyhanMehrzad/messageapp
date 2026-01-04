@@ -1,6 +1,6 @@
 import os
 
-bind = "0.0.0.0:5000"
+bind = "0.0.0.0:3002"
 workers = 1
 worker_class = "eventlet"
 threads = 1

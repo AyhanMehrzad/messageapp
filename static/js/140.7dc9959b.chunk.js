@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkfrontend=self.webpackChunkfrontend||[]).push([[140],{140:(e,s,a)=>{a.r(s),a.d(s,{default:()=>c});a(43);var n=a(579);const c=e=>{let{user:s,isConnected:a}=e;return(0,n.jsxs)("header",{className:"app-header",children:[(0,n.jsx)("div",{className:"app-title",children:"SecureChanel"}),(0,n.jsx)("div",{className:"user-status ".concat(a?"connected":""),children:a?"\u25cf SECURE":"\u25cb CONNECTING..."})]})}}}]);
+//# sourceMappingURL=140.7dc9959b.chunk.js.map

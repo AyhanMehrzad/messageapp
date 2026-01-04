@@ -1,5 +1,14 @@
-flask
-flask-socketio
-eventlet
-gunicorn
-flask-cors
+fastapi
+uvicorn[standard]
+python-multipart
+python-socketio
+aiofiles
+jinja2
+pywebpush
+# Legacy Flask dependencies (can be removed later)
+# flask
+# flask-socketio
+# eventlet
+# gunicorn
+# flask-cors
+# flask-sock

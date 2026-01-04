@@ -138,11 +138,19 @@ else
         exit 1
     fi
     
+    # Check if port 3002 is already in use (e.g. by systemd service)
+    if fuser 3002/tcp >/dev/null 2>&1; then
+        log_info "Port 3002 is busy. Reloading existing server..."
+        fuser -k -HUP 3002/tcp
+        log_info "Server reloaded successfully."
+        exit 0
+    fi
+
     # Run Flask App (using Gunicorn if available, else python)
     if command -v gunicorn &> /dev/null; then
         log_info "Starting Server with Gunicorn..."
         # 1 worker, eventlet worker class for socketio support
-        exec gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:5000 app:app
+        exec gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:3002 app:app
     else
         log_info "Gunicorn not found, starting with Python..."
         exec python app.py

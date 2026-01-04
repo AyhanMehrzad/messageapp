@@ -1,4 +1,5 @@
-import React, { useState, useEffect, lazy, Suspense, useCallback } from 'react';
+import React, { useState, useEffect, lazy, Suspense, useCallback, useRef } from 'react';
+import { registerPushNotifications, sendSubscriptionToBackend } from './utils/pushNotifications';
 import { io } from 'socket.io-client';
 import './App.css';
 
@@ -7,6 +8,7 @@ const ChatWindow = lazy(() => import('./components/ChatWindow'));
 const MessageInput = lazy(() => import('./components/MessageInput'));
 const ReplyPreview = lazy(() => import('./components/ReplyPreview'));
 const Login = lazy(() => import('./components/Login'));
+const PermissionModal = lazy(() => import('./components/PermissionModal'));
 
 // Initialize socket connection
 const BACKEND_URL = window.location.origin; // Use current origin (works for both dev and prod)
@@ -25,6 +27,7 @@ function App() {
   const [replyTo, setReplyTo] = useState(null);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [loading, setLoading] = useState(true);
+  const messageInputRef = useRef(null);
 
   useEffect(() => {
     // 1. Check Authentication via API
@@ -43,6 +46,12 @@ function App() {
           if (!socket.connected) {
             socket.connect();
           }
+          // Register for Push Notifications
+          registerPushNotifications().then(subscription => {
+            if (subscription) {
+              sendSubscriptionToBackend(subscription, data.username);
+            }
+          });
         }
         setLoading(false);
       })
@@ -79,6 +88,9 @@ function App() {
     const onPing = (data) => {
       // Simple visual feedback for ping
       const sender = data.user || 'Someone';
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
       alert(`🔔 ${sender} pinged you!`);
     };
 
@@ -92,6 +104,15 @@ function App() {
       console.log(`🗑️ History cleared by ${user}`);
     };
 
+    const onHeaderAction = (e) => {
+      const { action } = e.detail;
+      if (action === 'ping') {
+        socket.emit('ping');
+      }
+    };
+
+    window.addEventListener('header-action', onHeaderAction);
+
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('chat_message', onChatMessage);
@@ -101,6 +122,7 @@ function App() {
     socket.on('ping_error', onPingError);
 
     return () => {
+      window.removeEventListener('header-action', onHeaderAction);
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
       socket.off('chat_message', onChatMessage);
@@ -173,10 +195,22 @@ function App() {
     );
   }
 
+
+
   return (
     <div className="app-container">
       <Suspense fallback={<div className="loading-indicator"><div className="loading-spinner"></div>ESTABLISHING LINK...</div>}>
-        <Header user={user} isConnected={isConnected} />
+        <PermissionModal onComplete={() => console.log("Permissions flow complete")} />
+        <Header
+          user={user}
+          isConnected={isConnected}
+          onStopHardware={() => {
+            console.log("Stopping hardware via Header action");
+            if (messageInputRef.current) {
+              messageInputRef.current.stopHardware();
+            }
+          }}
+        />
 
         <ChatWindow
           messages={messages}
@@ -195,6 +229,7 @@ function App() {
           )}
 
           <MessageInput
+            ref={messageInputRef}
             onSend={sendMessage}
             onSocketAction={(action) => {
               if (action === 'ping') socket.emit('ping');

@@ -23,21 +23,16 @@ const Login = () => {
 
             const response = await fetch('/', {
                 method: 'POST',
+                headers: { 'Accept': 'application/json' },
                 body: formData,
             });
 
-            // If successful, it redirects. If we act like a browser, we follow redirects.
-            if (response.url.includes('dashboard') || response.redirected) {
-                window.location.reload(); // Reload to fetch user from /api/user
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                window.location.reload();
             } else {
-                // Did we get the login page back with an error?
-                const text = await response.text();
-                if (text.includes('Invalid Credentials')) {
-                    setError('Invalid Credentials');
-                } else {
-                    // Maybe successful but didn't redirect as expected?
-                    window.location.reload();
-                }
+                setError('Invalid Credentials');
             }
         } catch (err) {
             setError('Login failed. Ensure backend is running.');

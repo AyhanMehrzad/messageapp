@@ -1,17 +1,14 @@
 #!/bin/bash
-# Start the Flask development server
-
-echo "Starting Secure Messaging App..."
-echo "================================"
-echo ""
-echo "Server will be available at:"
-echo "  - Local: http://localhost:5000"
-echo "  - Network: http://$(hostname -I | awk '{print $1}'):5000"
-echo ""
-echo "Press Ctrl+C to stop the server"
-echo ""
+# Start the FastAPI server
+echo "Starting Secure Messaging App (FastAPI)..."
+echo "=========================================="
 
 cd "$(dirname "$0")"
 source venv/bin/activate
-python3 app.py
 
+# Stop any existing python server on port 3002
+fuser -k 3002/tcp > /dev/null 2>&1
+
+# Run uvicorn
+# app_asgi is the combined SocketIO + FastAPI app
+exec uvicorn main:app_asgi --host 0.0.0.0 --port 3002 --reload

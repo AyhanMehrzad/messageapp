@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/rupper/Desktop/web/app.py", line 607, in <module>
+    socketio.run(app, host='0.0.0.0', port=3002, debug=False)
+  File "/home/rupper/Desktop/web/venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 693, in run
+    run_server()
+  File "/home/rupper/Desktop/web/venv/lib/python3.12/site-packages/flask_socketio/__init__.py", line 670, in run_server
+    eventlet_socket = eventlet.listen(addresses[0][4],
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupper/Desktop/web/venv/lib/python3.12/site-packages/eventlet/convenience.py", line 78, in listen
+    sock.bind(addr)
+OSError: [Errno 98] Address already in use

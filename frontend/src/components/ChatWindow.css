@@ -2,3 +2,58 @@
   padding-bottom: 120px; /* reserve space for input and shortcuts */
 }
 
+/* --- Round Video Note Styles --- */
+
+/* Recording Preview */
+.video-preview-circle-container {
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: absolute;
+    bottom: 140px; /* Above controls */
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border: 2px solid white;
+    background: black;
+    z-index: 2000;
+}
+
+.video-preview-feed-circle {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Chat Message Video Bubble */
+.video-msg-wrapper {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.msg-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%; /* Double safety */
+}
+
+/* Ensure controls are hidden or styled minimally? 
+   Native controls might look boxy. 
+   Telegram doesn't usually show controls on the circle unless expanded.
+   But user asked for "persistent Download icon". 
+*/
+
+.video-download-btn {
+    transition: transform 0.2s;
+}
+
+.video-download-btn:active {
+    transform: scale(0.9);
+}
