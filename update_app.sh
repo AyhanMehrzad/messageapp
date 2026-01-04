@@ -34,8 +34,13 @@ cd "$APP_DIR"
 
 # 4. Restart Services
 echo "[4/4] Restarting Gunicorn Backend..."
-# Kill existing Gunicorn process
+
+# Aggressively kill existing Gunicorn/Python processes related to the app
+echo "Stopping old processes..."
 fuser -k 3002/tcp || true
+pkill -f "gunicorn" || true
+pkill -f "app:app" || true
+sleep 2 # Wait for ports to clear
 
 # Start Gunicorn in Daemon mode
 "$VENV_DIR/bin/gunicorn" -D -k eventlet -w 1 -b 0.0.0.0:3002 app:app
